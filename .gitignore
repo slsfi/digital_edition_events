@@ -2,3 +2,5 @@
 xml/*.xml
 subject_xml_update_log.txt
 location_xml_update_log.txt
+.vscode/
+__pycache__
