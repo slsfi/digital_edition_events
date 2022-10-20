@@ -80,13 +80,13 @@ def getPublicationOccurrenceId(eventId, pubId, extId, type='est'):
     values_to_find = (eventId, pubId)
     
     # Override
-    if type is 'com':
+    if type == 'com':
         find_sql = """ SELECT id FROM event_occurrence WHERE event_id = %s AND publication_id = %s AND publication_comment_id = %s AND deleted != 1 LIMIT 1 """
         values_to_find = (eventId, pubId, extId)
-    elif type is 'ms':
+    elif type == 'ms':
         find_sql = """ SELECT id FROM event_occurrence WHERE event_id = %s AND publication_id = %s AND publication_manuscript_id = %s AND deleted != 1 LIMIT 1 """
         values_to_find = (eventId, pubId, extId)
-    elif type is 'var':
+    elif type == 'var':
         find_sql = """ SELECT id FROM event_occurrence WHERE event_id = %s AND publication_id = %s AND publication_version_id = %s AND deleted != 1 LIMIT 1 """    
         values_to_find = (eventId, pubId, extId)
     
