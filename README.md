@@ -7,7 +7,7 @@ Scripts for creating events, event occurrences and event connections for subject
 2. Copy the published xml-files (not the originals) to the xml-folder (est, com, ms and/or var-files).
 3. Run subject_xml_occurrences.py to create events for subjects, and location_xml_occurrences.py to create events for locations.
 
-The scripts take three arguments, of which only the first is obligatory: PROJECT_ID DEBUG REMOVE_OLD.
+The scripts take three command line arguments, of which only the first is obligatory: PROJECT_ID DEBUG REMOVE_OLD.
 
 Set DEBUG to 1 to run the script in debug mode, which means no data is committed to the database. Any other value else is treated as false.
 
