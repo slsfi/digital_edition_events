@@ -12,7 +12,7 @@ else:
     exit()
     
 if len(sys.argv)>2 and re.search("^[0-1]{1}$", sys.argv[2]):
-    if sys.argv[2] is 1:
+    if int(sys.argv[2]) == 1:
         DEBUG = True
     else:
         DEBUG = False
@@ -20,7 +20,7 @@ else:
     DEBUG = True
     
 if len(sys.argv)>3 and re.search("^[0-1]{1}$", sys.argv[3]):
-    if sys.argv[3] is 1:
+    if int(sys.argv[3]) == 1:
         REMOVE_OLD = True
     else:
         REMOVE_OLD = False
