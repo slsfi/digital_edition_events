@@ -129,9 +129,12 @@ def createLocationEventConnection(locationId, eventId):
         values_to_insert = (locationId, eventId)
         cursor_new.execute(ec_insert_sql, values_to_insert)
         eventConnectionId = cursor_new.fetchone()[0]
-        return eventConnectionId
+        if eventConnectionId is not None and eventConnectionId > 0:
+            return 1
+        else:
+            return 0
     else:
-        return eventConnectionId
+        return 0
     
     
 # Event Connection - the Subject is Connected to the Event 
@@ -144,9 +147,12 @@ def createSubjectEventConnection(subjectId, eventId):
         values_to_insert = (subjectId, eventId)
         cursor_new.execute(ec_insert_sql, values_to_insert)
         eventConnectionId = cursor_new.fetchone()[0]
-        return eventConnectionId
+        if eventConnectionId is not None and eventConnectionId > 0:
+            return 1
+        else:
+            return 0
     else:
-        return eventConnectionId
+        return 0
     
 
 # Get from db
@@ -174,7 +180,7 @@ def getVersionId(file_name):
 
 
 # Connect the Publication to an Event
-def addPublictionOccurrence(event_id, publication_id, file_name):
+def addPublicationOccurrence(event_id, publication_id, file_name):
     # default to EST
     occId = getPublicationOccurrenceId(event_id, publication_id, None, 'est')
     if occId is None:

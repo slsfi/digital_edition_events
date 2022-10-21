@@ -14,50 +14,100 @@ logging.basicConfig(filename="location_xml_update_log.txt",
 # Find occurrences of locations in a Publication
 def findRef(dir, fileName):
     tree = ET.parse(dir + '/' + fileName)
-    addedTags = []
+    processedTags = []
+    addedConnections = 0
     
     # Get the ID of the Publication from the filename
     pubId = (fileName).split('_')[1]
+
     # Create or get the Event Id
     eventId = getEventId(pubId)
     if eventId is None:
         eventId = createEvent(pubId)
     # Add Event > Publication Connection
-    addPublictionOccurrence(eventId, pubId, fileName)
+    addPublicationOccurrence(eventId, pubId, fileName)
     
     # There might be many occurrences of the same or other locations
     for data in tree.findall(".//{http://www.tei-c.org/ns/1.0}placeName[@corresp]"):
         # add only one occurrence per location per publication
-        if data.attrib['corresp'] is not None and data.attrib['corresp'] not in addedTags:
+        if data.attrib['corresp'] is not None and data.attrib['corresp'] not in processedTags:
             # Get the Database id for the location (using legacy_id)
             locationId = getlocationId(data.attrib['corresp'])
             if locationId is not None:
-                # Connect the location to the Event           
-                createLocationEventConnection(locationId, eventId)
-                addedTags.append(data.attrib['corresp'])
-                logging.info("Added location '{}' occurrence to database for publication '{}'".format(data.attrib['corresp'], fileName))
+                # Connect the location to the Event. If a connection already exists, a new one is not created.
+                connectionInserted = createLocationEventConnection(locationId, eventId)
+                processedTags.append(data.attrib['corresp'])
+                if connectionInserted:
+                    addedConnections += 1
+                    if DEBUG is False:
+                        logging.info("Added location '{}' occurrence to database for publication '{}'".format(data.attrib['corresp'], fileName))
+                    else:
+                        logging.info("Debug mode: location '{}' occurrence could be added to database for publication '{}'".format(data.attrib['corresp'], fileName))
             else:
-                logging.warn("location missing in database '{}' in file '{}'".format(data.attrib['corresp'], fileName))
+                logging.warning("location missing in database '{}' in file '{}'".format(data.attrib['corresp'], fileName))
+    
+    return addedConnections
             
 # Get ALL the publications
 def findOccurrences():
+    addedConnections = 0
     for root, d_names, f_names in os.walk(XML_PATH, followlinks=True):
+        file_sum = 0
         for f in f_names:
             if f.endswith(".xml"):
+                file_sum += 1
+        
+        print(f"Processing occurrences in {file_sum} xml-files, progress:")
+        print("0         50        100 %")
+        print("|", end="", flush=True)
+        
+        file_counter = 0
+        progress = 1
+        progress_divisor = 20
+        for f in f_names:
+            if f.endswith(".xml"):
+                # Print progress to screen
+                if file_sum > progress_divisor:
+                    if file_counter > (((file_sum-1) / progress_divisor) * progress):
+                        print("-", end="", flush=True)
+                        progress += 1
                 # Check if we can find an occurrence of a location in the Publication
-                findRef(root, f)
+                addedConnections += findRef(root, f)
                 # Commit often, allot of data...
                 if DEBUG is False:
                     conn_new_db.commit()
                 
+                file_counter += 1
 
-# Check if we should remove old connections
-if REMOVE_OLD is True:
-    removeOldLocationConnections();
-    removeEmptyEventConnections();
+        if file_sum > progress_divisor:
+            print("-|")
+        else:
+            print("--------------------|")
+        print()
+
+    return addedConnections
                 
-findOccurrences()
+def main():
+    print("Running script with the following arguments:")
+    print(f"Project id: {PROJECT_ID}")
+    print(f"Debug: {DEBUG}")
+    print(f"Remove old connections: {REMOVE_OLD}")
+    print()
 
-if DEBUG is False:
-    conn_new_db.commit()
-conn_new_db.close()
+    # Check if we should remove old connections
+    if REMOVE_OLD is True:
+        print("Removing old location connections from project ...")
+        removeOldLocationConnections()
+        removeEmptyEventConnections()
+
+    addedConnections = findOccurrences()
+
+    if DEBUG is False:
+        conn_new_db.commit()
+        print(f"{addedConnections} location connections added to database. Database updated.")
+    else:
+        print(f"{addedConnections} location connections could be added to database. Database not updated.")
+    conn_new_db.close()
+    
+if __name__ == "__main__":
+    main()
