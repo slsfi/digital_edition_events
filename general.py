@@ -1,7 +1,7 @@
 from setup import *
 
 def removeOldSubjectConnections():
-    e_update_sql = """ UPDATE event_connection SET subject_id = NULL, date_modified=now() WHERE subject_id IN ( select id from subject where project_id = %s and type = 'person' ) AND work_manifestation_id is NULL AND type='publication-subject-occurrence' """
+    e_update_sql = """ UPDATE event_connection SET subject_id = NULL, date_modified=now() WHERE subject_id IN ( select id from subject where project_id = %s ) AND work_manifestation_id is NULL AND type='publication-subject-occurrence' """
     values_to_find = (PROJECT_ID, )
     cursor_new.execute(e_update_sql, values_to_find)
     conn_new_db.commit()
