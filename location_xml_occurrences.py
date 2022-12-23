@@ -5,14 +5,14 @@ from setup import *
 from general import *
 
 
-logging.basicConfig(filename="location_xml_update_log.txt",
+logging.basicConfig(filename="logs/location_xml_update_log.txt",
                 level=logging.DEBUG,
                 format='%(levelname)s: %(asctime)s %(message)s',
                 datefmt='%m/%d/%Y %I:%M:%S')
 
 
 # Find occurrences of locations in a Publication
-def findRef(dir, fileName):
+def find_ref(dir, fileName):
     tree = ET.parse(dir + '/' + fileName)
     processedTags = []
     addedConnections = 0
@@ -21,21 +21,21 @@ def findRef(dir, fileName):
     pubId = (fileName).split('_')[1]
 
     # Create or get the Event Id
-    eventId = getEventId(pubId)
+    eventId = get_event_id(pubId)
     if eventId is None:
-        eventId = createEvent(pubId)
+        eventId = create_event("publication", pubId)
     # Add Event > Publication Connection
-    addPublicationOccurrence(eventId, pubId, fileName)
+    add_publication_occurrence(eventId, pubId, fileName)
     
     # There might be many occurrences of the same or other locations
     for data in tree.findall(".//{http://www.tei-c.org/ns/1.0}placeName[@corresp]"):
         # add only one occurrence per location per publication
         if data.attrib['corresp'] is not None and data.attrib['corresp'] not in processedTags:
             # Get the Database id for the location (using legacy_id)
-            locationId = getlocationId(data.attrib['corresp'])
+            locationId = get_location_id(data.attrib['corresp'])
             if locationId is not None:
                 # Connect the location to the Event. If a connection already exists, a new one is not created.
-                connectionInserted = createLocationEventConnection(locationId, eventId)
+                connectionInserted = create_location_event_connection(locationId, eventId)
                 processedTags.append(data.attrib['corresp'])
                 if connectionInserted:
                     addedConnections += 1
@@ -49,9 +49,9 @@ def findRef(dir, fileName):
     return addedConnections
             
 # Get ALL the publications
-def findOccurrences():
+def find_occurrences():
     addedConnections = 0
-    for root, d_names, f_names in os.walk(XML_PATH, followlinks=True):
+    for root, d_names, f_names in os.walk(XML_FOLDERPATH, followlinks=True):
         file_sum = 0
         for f in f_names:
             if f.endswith(".xml"):
@@ -72,7 +72,7 @@ def findOccurrences():
                         print("-", end="", flush=True)
                         progress += 1
                 # Check if we can find an occurrence of a location in the Publication
-                addedConnections += findRef(root, f)
+                addedConnections += find_ref(root, f)
                 # Commit often, allot of data...
                 if DEBUG is False:
                     conn_new_db.commit()
@@ -97,10 +97,10 @@ def main():
     # Check if we should remove old connections
     if REMOVE_OLD is True:
         print("Removing old location connections from project ...")
-        removeOldLocationConnections()
-        removeEmptyEventConnections()
+        remove_old_location_connections()
+        remove_empty_event_connections()
 
-    addedConnections = findOccurrences()
+    addedConnections = find_occurrences()
 
     if DEBUG is False:
         conn_new_db.commit()
