@@ -1,6 +1,6 @@
 ######################## ABOUT THIS SCRIPT ########################
 #
-# Version: 1.0
+# Version: 1.0.1
 #
 # This script is used to insert new tags in the tag-table of the
 # database, or to update existing tags. The tags are read from
@@ -30,7 +30,10 @@
 # Created by Sebastian Köhler 2022-10-27.
 #
 # Change log:
-#   - 2022-10-27: v1.0
+#   - 2024-11-26: v1.0.1
+#       - Tags that are marked deleted in the database are not
+#         re-entered if they occur in the import data.
+#   - 2022-10-27: v1.0.0
 #
 ###################################################################
 import os
