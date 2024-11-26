@@ -374,12 +374,17 @@ def add_publication_occurrence(event_id, publication_id, file_name):
         return event_occurrence_id
     
 
-def get_tag(legacyId, projectId, usingLegacyId = True):
-    if usingLegacyId:
-        find_sql = """ SELECT * FROM tag WHERE legacy_id = %s AND project_id = %s AND deleted != 1 """
+def get_tag(legacy_id, project_id, using_legacy_id=True, include_deleted=False):
+    if using_legacy_id:
+        find_sql = """SELECT * FROM tag WHERE legacy_id = %s AND project_id = %s"""
     else:
-        find_sql = """ SELECT * FROM tag WHERE id = %s AND project_id = %s AND deleted != 1 """
-    values_to_find = (legacyId, projectId)
+        find_sql = """SELECT * FROM tag WHERE id = %s AND project_id = %s"""
+    
+    # Append the condition for deleted only if include_deleted is False
+    if not include_deleted:
+        find_sql += " AND deleted != 1"
+    
+    values_to_find = (legacy_id, project_id)
     cursor_new.execute(find_sql, values_to_find)
     result = cursor_new.fetchall()
     return result

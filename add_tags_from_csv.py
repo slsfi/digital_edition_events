@@ -143,10 +143,15 @@ def update_database_with_tags(tagsReader, totalRows):
 
         # Check if tag already exists in database using legacy_id
         tagId = None
-        tagDataset = get_tag(legacyId, PROJECT_ID)
-        if len(tagDataset) > 1:
+        tagDataset = get_tag(legacyId, PROJECT_ID, True, True)
+
+        # Filter non-deleted and deleted tags from all returned tags
+        non_deleted_tags = [row for row in tagDataset if row['deleted'] < 1]
+        deleted_tags = [row for row in tagDataset if row['deleted'] > 0]
+
+        if len(non_deleted_tags) > 1:
             logging.warning("Multiple non-deleted tags with legacy_id '{}' exist in the database. The data of this tag has not been updated in the database.".format(legacyId))
-        elif len(tagDataset) < 1:
+        elif len(non_deleted_tags) < 1 and len(deleted_tags) < 1:
             # Create tag
             tagId = create_tag(legacyId, name, type, description, source, PROJECT_ID)
             insertedCount += 1
@@ -154,9 +159,11 @@ def update_database_with_tags(tagsReader, totalRows):
                 logging.info("Inserted tag with id '{}' and legacy_id '{}' into database".format(tagId, legacyId))
             else:
                 logging.info("Debug mode: tag with id '{}' and legacy_id '{}' could be inserted into database".format(tagId, legacyId))
-        else:
+        elif len(deleted_tags) > 0 and len(non_deleted_tags) < 1:
+            logging.info("Skipping tag with legacy_id '{}'; it is marked as deleted in the database.".format(legacyId))
+        elif len(non_deleted_tags) > 0:
             # Tag exists, update using legacy_id if data has changed
-            tagData = tagDataset[0]
+            tagData = non_deleted_tags[0]
             dataUnchanged = compare_tag_data(tagData, name, type, description, source)
 
             if dataUnchanged == False:
@@ -166,7 +173,7 @@ def update_database_with_tags(tagsReader, totalRows):
                     logging.info("Updated tag with id '{}' and legacy_id '{}' in database".format(tagId, legacyId))
                 else:
                     logging.info("Debug mode: tag with id '{}' and legacy_id '{}' could be updated in database".format(tagId, legacyId))
-        
+
         if DEBUG is False and tagId is not None:
             conn_new_db.commit()
         rowCounter += 1
