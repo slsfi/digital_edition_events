@@ -2,5 +2,6 @@
 xml/*.xml
 logs/*.txt
 data/*.csv
+data/**/*.*
 .vscode/
 __pycache__
