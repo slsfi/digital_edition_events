@@ -1,8 +1,11 @@
 ######################## ABOUT THIS SCRIPT ########################
 #
-# Version: 1.0
+# Version: 1.0.0
 #
-# The input csv-file must not contains a header row. The first
+# This script is used to create links between tags and publications
+# in the database.
+#
+# The input csv-file must not contain a header row. The first
 # field on each row must be publication id, the second field is
 # skipped and can contain anything, e.g. publication name. The
 # following fields must contain tag information in a format
@@ -20,7 +23,7 @@
 # Created by Sebastian Köhler 2022-10-28.
 #
 # Change log:
-#   - 2022-10-28: v1.0
+#   - 2022-10-28: v1.0.0
 #
 ###################################################################
 import os
@@ -122,8 +125,7 @@ def update_database_with_tag_occurrences(tags_reader, total_rows):
         for index in range(len(row)):
             # Skip the first two fields in the row since they contain publication id and title
             if index > 1 and row[index] != "":
-                # Extract the tag legacy id from the field (assume it's
-                # inside brackets)
+                # Extract the tag legacy id from the field (assume it's inside brackets)
                 m = re.search(r"\[([0-9]+?)\]", row[index])
                 if m and m.group(1) is not None and m.group(1).isdigit():
                     tag_legacy_id = TAG_LEGACY_ID_PREFIX + m.group(1)
@@ -145,8 +147,7 @@ def update_database_with_tag_occurrences(tags_reader, total_rows):
                             publication_tags_in_file.append(tag_id)
                             event_id = get_event_id_for_tag_publication_connection(publication_id, tag_id)
                             if event_id is None:
-                                # Create event, connect tag to it, and create a
-                                # publication occurrence
+                                # Create event, connect tag to it, and create a publication occurrence
                                 event_id = create_event("publication-tag", "project " + PROJECT_ID)
                                 if event_id is None:
                                     logging.warning(f"------- Failed to insert event for tag_id {tag_id} (legacy_id {tag_legacy_id}). Event connection and occurrence will not be created.")
