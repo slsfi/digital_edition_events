@@ -56,7 +56,7 @@ def add_tag_occurrences_from_csv_file():
                                     doublequote=CSV_DOUBLEQUOTE,
                                     escapechar=CSV_ESCAPECHAR,
                                     quoting=CSV_QUOTING)
-            update_database_with_tag_occurrences(reader, row_count - 1)
+            update_database_with_tag_occurrences(reader, row_count)
     except FileNotFoundError as error:
         print(f"Unable to open the csv-file {INPUT_FILEPATH}. Terminating script.")
         print(error)
