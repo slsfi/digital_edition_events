@@ -9,11 +9,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Set global parameters
-if len(sys.argv) > 1 and re.search("^[0-1]{1}$", sys.argv[1]):
-    if int(sys.argv[1]) == 1:
-        DEBUG = True
-    else:
+if len(sys.argv) > 1 and sys.argv[1] == "DEBUG" and re.search("^[0-1]{1}$", sys.argv[2]):
+    if int(sys.argv[2]) == 0:
         DEBUG = False
+    else:
+        DEBUG = True
 else:
     DEBUG = True
     
